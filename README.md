@@ -15,4 +15,14 @@ Load the extension as an unpacked extension in your Chromium-based browser:
 2. Enable "Developer mode".
 3. Click "Load unpacked" and select the extension directory.
 
+## Screenshots
+
+### Settings Page
+![Settings Light Mode](settings_light.png)
+![Settings Dark Mode](settings_dark.png)
+
+### Removal Puzzle Modal
+![Puzzle Light Mode](puzzle_modal_light.png)
+![Puzzle Dark Mode](puzzle_modal_dark.png)
+
 Stay productive and eliminate distractions!
