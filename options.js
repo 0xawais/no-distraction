@@ -154,15 +154,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function generatePuzzle() {
-        let a = Math.floor(Math.random() * 8) + 2;
-        if (Math.random() > 0.5) a = -a;
         expectedAnswer = Math.floor(Math.random() * 20) - 10;
+
+        let a = Math.floor(Math.random() * 8) + 1;
+        if (Math.random() > 0.5) a = -a;
+        let d1 = Math.floor(Math.random() * 5) + 2;
+
         let b = Math.floor(Math.random() * 20) - 10;
-        let c = a * expectedAnswer + b;
-        let equationStr = `${a}x`;
-        if (b > 0) { equationStr += ` + ${b}`; }
-        else if (b < 0) { equationStr += ` - ${Math.abs(b)}`; }
-        equationStr += ` = ${c}`;
+        if (b === 0) b = 1;
+        let d2 = Math.floor(Math.random() * 5) + 2;
+
+        let num = (a * expectedAnswer * d2) + (b * d1);
+        let den = d1 * d2;
+
+        function gcd(x, y) {
+            x = Math.abs(x);
+            y = Math.abs(y);
+            while(y) {
+                var t = y;
+                y = x % y;
+                x = t;
+            }
+            return x || 1;
+        }
+
+        let divisor = gcd(num, den);
+        let c = num / divisor;
+        let d3 = den / divisor;
+
+        if (d3 < 0) {
+            c = -c;
+            d3 = -d3;
+        }
+
+        let term1 = d1 === 1 ? `${a}x` : `(${a}/${d1})x`;
+
+        let term2 = '';
+        if (b > 0) {
+            term2 = d2 === 1 ? ` + ${b}` : ` + (${b}/${d2})`;
+        } else {
+            term2 = d2 === 1 ? ` - ${Math.abs(b)}` : ` - (${Math.abs(b)}/${d2})`;
+        }
+
+        let rightSide = d3 === 1 ? `${c}` : `${c}/${d3}`;
+
+        let equationStr = `${term1}${term2} = ${rightSide}`;
         modalEquation.textContent = equationStr;
     }
 
