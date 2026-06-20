@@ -18,11 +18,11 @@ Load the extension as an unpacked extension in your Chromium-based browser:
 ## Screenshots
 
 ### Settings Page
-![Settings Light Mode](images/settings_light.png)
-![Settings Dark Mode](images/settings_dark.png)
+![Settings Light Mode](settings_light.png)
+![Settings Dark Mode](settings_dark.png)
 
 ### Removal Puzzle Modal
-![Puzzle Light Mode](images/puzzle_modal_light.png)
-![Puzzle Dark Mode](images/puzzle_modal_dark.png)
+![Puzzle Light Mode](puzzle_modal_light.png)
+![Puzzle Dark Mode](puzzle_modal_dark.png)
 
 Stay productive and eliminate distractions!
