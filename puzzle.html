@@ -5,15 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>No Distraction!</title>
     <style>
-        body { font-family: -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
-        .container { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 100%; }
-        h1 { margin-top: 0; color: #d32f2f; }
+        :root {
+            --bg-color: #f0f2f5;
+            --text-color: #333;
+            --container-bg: white;
+            --heading-color: #d32f2f;
+            --input-border: #ccc;
+            --input-bg: white;
+            --input-text: #333;
+            --btn-primary-bg: #1976d2;
+            --btn-primary-hover: #1565c0;
+            --btn-danger-bg: #d32f2f;
+            --shadow: rgba(0,0,0,0.1);
+            --equation-bg: #e3f2fd;
+            --equation-color: #1565c0;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #121212;
+                --text-color: #e0e0e0;
+                --container-bg: #1e1e1e;
+                --heading-color: #ef5350;
+                --input-border: #555;
+                --input-bg: #2d2d2d;
+                --input-text: #e0e0e0;
+                --btn-primary-bg: #1976d2;
+                --btn-primary-hover: #1565c0;
+                --btn-danger-bg: #ef5350;
+                --shadow: rgba(0,0,0,0.5);
+                --equation-bg: rgba(25, 118, 210, 0.1);
+                --equation-color: #64b5f6;
+            }
+        }
+
+        body { font-family: -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: var(--bg-color); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
+        .container { background: var(--container-bg); padding: 40px; border-radius: 8px; box-shadow: 0 4px 12px var(--shadow); text-align: center; max-width: 400px; width: 100%; transition: background-color 0.3s; }
+        h1 { margin-top: 0; color: var(--heading-color); }
         p { font-size: 1.1em; margin-bottom: 20px; }
-        .equation-box { font-size: 2em; font-weight: bold; margin: 20px 0; padding: 20px; background: #e3f2fd; border-radius: 4px; color: #1565c0; }
-        input[type="number"] { font-size: 1.5em; padding: 10px; width: 100px; text-align: center; border: 2px solid #ccc; border-radius: 4px; margin-bottom: 20px; }
-        button { background-color: #1976d2; color: white; border: none; padding: 12px 24px; font-size: 1.2em; border-radius: 4px; cursor: pointer; }
-        .error { color: #d32f2f; margin-top: 10px; min-height: 20px; font-weight: bold; }
-        .target-site { font-weight: bold; color: #1976d2; }
+        .equation-box { font-size: 2em; font-weight: bold; margin: 20px 0; padding: 20px; background: var(--equation-bg); border-radius: 4px; color: var(--equation-color); }
+        input[type="number"] { font-size: 1.5em; padding: 10px; width: 100px; text-align: center; border: 2px solid var(--input-border); border-radius: 4px; margin-bottom: 20px; background-color: var(--input-bg); color: var(--input-text); }
+        button { background-color: var(--btn-primary-bg); color: white; border: none; padding: 12px 24px; font-size: 1.2em; border-radius: 4px; cursor: pointer; transition: background-color 0.2s; }
+        button:hover { background-color: var(--btn-primary-hover); }
+        .error { color: var(--btn-danger-bg); margin-top: 10px; min-height: 20px; font-weight: bold; }
+        .target-site { font-weight: bold; color: var(--btn-primary-bg); }
     </style>
 </head>
 <body>
