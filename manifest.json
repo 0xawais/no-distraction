@@ -3,7 +3,7 @@
   "name": "No Distraction!",
   "version": "1.0.0",
   "description": "Requires solving a 7th grade math problem to unlock distracting websites.",
-  "permissions": ["storage", "webNavigation"],
+  "permissions": ["storage", "webNavigation", "tabs", "alarms"],
   "host_permissions": ["<all_urls>"],
   "background": {"service_worker": "background.js"},
   "options_ui": {"page": "options.html", "open_in_tab": true},
