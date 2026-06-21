@@ -11,10 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalCancel = document.getElementById('modal-cancel');
     const modalSubmit = document.getElementById('modal-submit');
     const modalError = document.getElementById('modal-error-message');
-    const removeSiteNameSpan = document.getElementById('remove-site-name');
+    const modalSiteNameSpan = document.getElementById('modal-site-name');
+    const modalTitle = document.getElementById('modal-title');
+    const modalDesc = document.getElementById('modal-desc');
     const lockAllBtn = document.getElementById('lock-all-btn');
 
-    let currentSiteToRemove = null;
+    let currentSiteToProcess = null;
+    let currentModalAction = null; // 'remove' or 'unlock'
     let expectedAnswer = null;
     let timerInterval = null;
 
@@ -68,6 +71,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 lockBtn.style.fontSize = '0.9em';
                 lockBtn.addEventListener('click', () => lockSite(site));
                 rightContainer.appendChild(lockBtn);
+            } else {
+                const unlockBtn = document.createElement('button');
+                unlockBtn.textContent = 'Unlock for 15m';
+                unlockBtn.style.backgroundColor = '#4caf50'; // Green to stand out
+                unlockBtn.style.padding = '6px 12px';
+                unlockBtn.style.fontSize = '0.9em';
+                unlockBtn.addEventListener('click', () => initiateUnlockSite(site));
+                rightContainer.appendChild(unlockBtn);
             }
 
             const removeBtn = document.createElement('button');
@@ -144,8 +155,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initiateRemoveSite(site) {
-        currentSiteToRemove = site;
-        removeSiteNameSpan.textContent = site;
+        currentSiteToProcess = site;
+        currentModalAction = 'remove';
+        modalTitle.textContent = 'Solve to Remove';
+        modalDesc.innerHTML = `Solve this equation to remove <span id="modal-site-name" class="target-site">${site}</span> from your block list.`;
+        modalSubmit.textContent = 'Remove Site';
+        modalSubmit.style.backgroundColor = 'var(--btn-danger-bg)';
         generatePuzzle();
         modalError.textContent = '';
         modalAnswer.value = '';
@@ -153,16 +168,40 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => modalAnswer.focus(), 100);
     }
 
-    function generatePuzzle() {
-        expectedAnswer = Math.floor(Math.random() * 20) - 10;
+    function initiateUnlockSite(site) {
+        currentSiteToProcess = site;
+        currentModalAction = 'unlock';
+        modalTitle.textContent = 'Solve to Unlock';
+        modalDesc.innerHTML = `Solve this equation to unlock <span id="modal-site-name" class="target-site">${site}</span> for 15 minutes.`;
+        modalSubmit.textContent = 'Unlock Site';
+        modalSubmit.style.backgroundColor = '#4caf50';
+
+        chrome.storage.local.get(['siteDifficulty'], (result) => {
+            const diffMap = result.siteDifficulty || {};
+            const difficulty = diffMap[site] || 1;
+            generatePuzzle(difficulty);
+            modalError.textContent = '';
+            modalAnswer.value = '';
+            modal.classList.remove('hidden');
+            setTimeout(() => modalAnswer.focus(), 100);
+        });
+    }
+
+    function generatePuzzle(difficulty = 1) {
+        // Base ranges increase with difficulty
+        const maxDenominator = 5 + difficulty * 2;
+        const xRange = 10 + (difficulty * 3);
+        const constantRange = 10 + (difficulty * 5);
+
+        expectedAnswer = Math.floor(Math.random() * xRange) - Math.floor(xRange / 2);
 
         let a = Math.floor(Math.random() * 8) + 1;
         if (Math.random() > 0.5) a = -a;
-        let d1 = Math.floor(Math.random() * 5) + 2;
+        let d1 = Math.floor(Math.random() * maxDenominator) + 2;
 
-        let b = Math.floor(Math.random() * 20) - 10;
+        let b = Math.floor(Math.random() * constantRange) - Math.floor(constantRange / 2);
         if (b === 0) b = 1;
-        let d2 = Math.floor(Math.random() * 5) + 2;
+        let d2 = Math.floor(Math.random() * maxDenominator) + 2;
 
         let num = (a * expectedAnswer * d2) + (b * d1);
         let den = d1 * d2;
@@ -204,14 +243,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closeAndResetModal() {
         modal.classList.add('hidden');
-        currentSiteToRemove = null;
+        currentSiteToProcess = null;
+        currentModalAction = null;
         expectedAnswer = null;
         modalAnswer.value = '';
         modalError.textContent = '';
+        modalSubmit.style.backgroundColor = ''; // Reset custom color
     }
 
-    function verifyAndRemove() {
-        if (!currentSiteToRemove) return;
+    function verifyAndProcess() {
+        if (!currentSiteToProcess) return;
         const userAnswer = parseInt(modalAnswer.value, 10);
         if (isNaN(userAnswer)) {
             modalError.textContent = 'Please enter a number.';
@@ -219,18 +260,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (userAnswer === expectedAnswer) {
-            chrome.storage.local.get(['blockedSites', 'unlockedSites'], (result) => {
-                let sites = result.blockedSites || [];
-                sites = sites.filter(site => site !== currentSiteToRemove);
+            if (currentModalAction === 'remove') {
+                chrome.storage.local.get(['blockedSites', 'unlockedSites'], (result) => {
+                    let sites = result.blockedSites || [];
+                    sites = sites.filter(site => site !== currentSiteToProcess);
 
-                let unlockedSites = result.unlockedSites || {};
-                delete unlockedSites[currentSiteToRemove]; // Also lock it if removing
+                    let unlockedSites = result.unlockedSites || {};
+                    delete unlockedSites[currentSiteToProcess];
 
-                chrome.storage.local.set({ blockedSites: sites, unlockedSites: unlockedSites }, () => {
-                    renderSites(sites, unlockedSites);
-                    closeAndResetModal();
+                    chrome.storage.local.set({ blockedSites: sites, unlockedSites: unlockedSites }, () => {
+                        renderSites(sites, unlockedSites);
+                        closeAndResetModal();
+                    });
                 });
-            });
+            } else if (currentModalAction === 'unlock') {
+                const UNLOCK_DURATION_MS = 15 * 60 * 1000;
+                const expiry = Date.now() + UNLOCK_DURATION_MS;
+                chrome.storage.local.get(['unlockedSites', 'siteDifficulty', 'blockedSites'], (result) => {
+                    const unlockedSites = result.unlockedSites || {};
+                    unlockedSites[currentSiteToProcess] = expiry;
+
+                    const siteDifficulty = result.siteDifficulty || {};
+                    siteDifficulty[currentSiteToProcess] = (siteDifficulty[currentSiteToProcess] || 1) + 1;
+
+                    chrome.storage.local.set({ unlockedSites, siteDifficulty }, () => {
+                        renderSites(result.blockedSites || [], unlockedSites);
+                        closeAndResetModal();
+                    });
+                });
+            }
         } else {
             modalError.textContent = 'Incorrect. Try again!';
             modalAnswer.value = '';
@@ -248,8 +306,8 @@ document.addEventListener('DOMContentLoaded', () => {
     lockAllBtn.addEventListener('click', lockAllSites);
 
     modalCancel.addEventListener('click', closeAndResetModal);
-    modalSubmit.addEventListener('click', verifyAndRemove);
-    modalAnswer.addEventListener('keypress', (e) => { if (e.key === 'Enter') verifyAndRemove(); });
+    modalSubmit.addEventListener('click', verifyAndProcess);
+    modalAnswer.addEventListener('keypress', (e) => { if (e.key === 'Enter') verifyAndProcess(); });
 
     // Close modal if clicked outside of content
     modal.addEventListener('click', (e) => {

@@ -95,8 +95,8 @@
 
     <div id="puzzle-modal" class="modal hidden">
         <div class="modal-content">
-            <h2>Solve to Remove</h2>
-            <p>Solve this equation to remove <span id="remove-site-name" class="target-site">the site</span> from your block list.</p>
+            <h2 id="modal-title">Solve to Remove</h2>
+            <p id="modal-desc">Solve this equation to remove <span id="modal-site-name" class="target-site">the site</span> from your block list.</p>
             <div id="modal-equation" class="equation-box">Loading...</div>
             <div>
                 <label for="modal-answer">x = </label>
@@ -104,7 +104,7 @@
             </div>
             <div class="modal-actions">
                 <button id="modal-cancel" class="cancel-btn">Cancel</button>
-                <button id="modal-submit" class="submit-remove-btn">Remove Site</button>
+                <button id="modal-submit" class="submit-remove-btn">Submit</button>
             </div>
             <div id="modal-error-message" class="error" style="margin-top: 10px;"></div>
         </div>
